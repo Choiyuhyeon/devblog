@@ -25,35 +25,6 @@ body {
     color: var(--text-color);
     background-color: var(--bg-color);
     overflow-x: hidden;
-    cursor: none; /* 기본 커서 숨기기 */
-}
-
-/* 커스텀 커서 */
-.custom-cursor {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #FF7A59;
-    border-radius: 50%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 9999;
-    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
-    transform: translate(-50%, -50%);
-    mix-blend-mode: difference;
-    opacity: 1;
-}
-
-.custom-cursor.hover {
-    width: 40px;
-    height: 40px;
-    border-color: #FF7A59;
-    background-color: rgba(255, 122, 89, 0.1);
-}
-
-.custom-cursor.click {
-    transform: translate(-50%, -50%) scale(0.8);
 }
 
 /* Navigation */

@@ -164,7 +164,6 @@ const postsPerPage = 9;
 document.addEventListener('DOMContentLoaded', async () => {
     initSidebar();
     initNavigation();
-    initCustomCursor();
     await loadPostsFromMarkdownFiles();
     initRouting();
     loadRecentArticles();
@@ -981,82 +980,6 @@ function goToPage(page) {
 // 전역으로 노출
 window.goToPage = goToPage;
 
-// 커스텀 커서 애니메이션
-function initCustomCursor() {
-    const cursor = document.getElementById('customCursor');
-    if (!cursor) return;
-    
-    let mouseX = 0;
-    let mouseY = 0;
-    let cursorX = 0;
-    let cursorY = 0;
-    let isAnimating = false;
-    
-    // 마우스 위치 추적
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        
-        if (!isAnimating) {
-            isAnimating = true;
-            animateCursor();
-        }
-    });
-    
-    // 부드러운 애니메이션을 위한 requestAnimationFrame
-    function animateCursor() {
-        // 부드러운 따라가기 효과 (easing)
-        const dx = mouseX - cursorX;
-        const dy = mouseY - cursorY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance > 0.5) {
-            cursorX += dx * 0.15;
-            cursorY += dy * 0.15;
-            
-            cursor.style.left = cursorX + 'px';
-            cursor.style.top = cursorY + 'px';
-            
-            requestAnimationFrame(animateCursor);
-        } else {
-            isAnimating = false;
-        }
-    }
-    
-    // 호버 가능한 요소에 대한 이벤트 (이벤트 위임 사용)
-    document.addEventListener('mouseenter', (e) => {
-        const target = e.target;
-        if (target.matches('a, button, .article-card, .nav-link, .blog-category-item, .pagination-btn, .more-posts-link')) {
-            cursor.classList.add('hover');
-        }
-    }, true);
-    
-    document.addEventListener('mouseleave', (e) => {
-        const target = e.target;
-        if (target.matches('a, button, .article-card, .nav-link, .blog-category-item, .pagination-btn, .more-posts-link')) {
-            cursor.classList.remove('hover');
-        }
-    }, true);
-    
-    document.addEventListener('mousedown', () => {
-        cursor.classList.add('click');
-    });
-    
-    document.addEventListener('mouseup', () => {
-        cursor.classList.remove('click');
-    });
-    
-    // 마우스가 화면 밖으로 나갔을 때
-    document.addEventListener('mouseleave', () => {
-        cursor.style.opacity = '0';
-    });
-    
-    document.addEventListener('mouseenter', () => {
-        cursor.style.opacity = '1';
-    });
-}
-
-
 // 글 카드 생성
 function createArticleCard(post, isListStyle = false) {
     const formattedDate = formatDate(post.date);
@@ -1204,28 +1127,37 @@ function typeWriter(element, text, speed = 100, onComplete = null) {
 }
 
 // home.html에서 타이핑 애니메이션 초기화 (5초마다 반복)
+function initTypingAnimation() {
+    const typingElement = document.getElementById('typing-text');
+    if (!typingElement) return;
+    
+    const text = '기록하고 성장하는 개발자, 최유현 입니다.';
+    
+    // 첫 실행
+    typeWriter(typingElement, text, 100, () => {
+        // 타이핑 완료 후 5초 대기 후 다시 시작
+        setTimeout(() => {
+            // 5초마다 반복 실행
+            const repeatTyping = () => {
+                typeWriter(typingElement, text, 100, () => {
+                    setTimeout(repeatTyping, 5000);
+                });
+            };
+            repeatTyping();
+        }, 5000);
+    });
+}
+
+// home.html에서 타이핑 애니메이션 초기화
 if (window.location.pathname.includes('home.html') || 
     (window.location.pathname === '/' && !window.location.hash)) {
-    document.addEventListener('DOMContentLoaded', () => {
-        const typingElement = document.getElementById('typing-text');
-        if (typingElement) {
-            const text = '기록하고 성장하는 개발자, 최유현 입니다.';
-            
-            // 첫 실행
-            typeWriter(typingElement, text, 100, () => {
-                // 타이핑 완료 후 5초 대기 후 다시 시작
-                setTimeout(() => {
-                    // 5초마다 반복 실행
-                    const repeatTyping = () => {
-                        typeWriter(typingElement, text, 100, () => {
-                            setTimeout(repeatTyping, 5000);
-                        });
-                    };
-                    repeatTyping();
-                }, 5000);
-            });
-        }
-    });
+    // DOMContentLoaded 이벤트가 이미 발생했을 수 있으므로 즉시 실행도 시도
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTypingAnimation);
+    } else {
+        // 이미 로드된 경우 즉시 실행
+        setTimeout(initTypingAnimation, 100);
+    }
 }
 
 // 코드 하이라이팅 함수 (간단한 버전)
