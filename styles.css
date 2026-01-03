@@ -1042,7 +1042,6 @@ body:has(.home-hero) .main-content {
 .home-articles-header {
     margin-bottom: 3rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid var(--border-color);
 }
 
 .home-section-title {

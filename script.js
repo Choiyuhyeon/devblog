@@ -1129,7 +1129,11 @@ function typeWriter(element, text, speed = 100, onComplete = null) {
 // home.html에서 타이핑 애니메이션 초기화 (5초마다 반복)
 function initTypingAnimation() {
     const typingElement = document.getElementById('typing-text');
-    if (!typingElement) return;
+    if (!typingElement) {
+        // 요소가 아직 없으면 재시도
+        setTimeout(initTypingAnimation, 100);
+        return;
+    }
     
     const text = '기록하고 성장하는 개발자, 최유현 입니다.';
     
@@ -1149,16 +1153,34 @@ function initTypingAnimation() {
 }
 
 // home.html에서 타이핑 애니메이션 초기화
-if (window.location.pathname.includes('home.html') || 
-    (window.location.pathname === '/' && !window.location.hash)) {
-    // DOMContentLoaded 이벤트가 이미 발생했을 수 있으므로 즉시 실행도 시도
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTypingAnimation);
-    } else {
-        // 이미 로드된 경우 즉시 실행
-        setTimeout(initTypingAnimation, 100);
+function checkAndInitTyping() {
+    // 경로 체크: home.html 또는 루트 경로
+    const isHomePage = window.location.pathname.includes('home.html') || 
+                       window.location.pathname === '/' || 
+                       window.location.pathname.endsWith('/') ||
+                       (window.location.pathname === '/index.html' && !window.location.hash);
+    
+    if (isHomePage) {
+        // 여러 방법으로 시도
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTypingAnimation);
+        } else {
+            // 이미 로드된 경우 즉시 실행
+            initTypingAnimation();
+        }
     }
 }
+
+// 스크립트 로드 시점에 실행
+checkAndInitTyping();
+
+// 추가 안전장치: window.onload 후에도 확인
+window.addEventListener('load', () => {
+    const typingElement = document.getElementById('typing-text');
+    if (typingElement && typingElement.textContent === '') {
+        initTypingAnimation();
+    }
+});
 
 // 코드 하이라이팅 함수 (간단한 버전)
 function highlightCode(code, language) {
