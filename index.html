@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>devblog - 개발 블로그</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html">noy.log</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="home.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+                <li><a href="#blog" class="nav-link">Blog</a></li>
+                <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 토글" style="display: none;">☰</button>
+            <button class="menu-toggle" aria-label="메뉴 토글">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>카테고리</h3>
+            <button class="sidebar-close" id="sidebarClose" aria-label="사이드바 닫기">×</button>
+        </div>
+        <ul class="category-list" id="categoryList">
+            <li><a href="#" class="category-link active" data-category="all" onclick="event.preventDefault(); if(typeof filterByCategory === 'function') filterByCategory('all');">전체</a></li>
+            <!-- Categories will be loaded dynamically -->
+        </ul>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+
+        <!-- Blog Section -->
+        <section id="blog" class="section active">
+            <div class="blog-container">
+                <div class="blog-content">
+                    <!-- <h2 class="section-title">블로그 파트 제목!</h2> -->
+                    <div class="articles-grid" id="all-articles-grid">
+                        <!-- All articles will be loaded here -->
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </div>
+                <!-- Right Sidebar for Blog -->
+                <aside class="blog-right-sidebar" id="blogRightSidebar">
+                    <div class="blog-sidebar-header">
+                        <h3>카테고리</h3>
+                    </div>
+                    <nav class="blog-category-nav">
+                        <ul class="blog-category-list" id="blogCategoryList">
+                            <!-- Categories will be loaded here -->
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+        </section>
+
+        <!-- Blog Post Detail -->
+        <section id="post-detail" class="section">
+            <div class="post-detail-container">
+                <div class="post-detail-content-wrapper">
+                    <div class="container">
+                        <!-- <a href="#blog" class="back-link">← Back to Blog</a> -->
+                        <article class="post-detail" id="post-detail-content">
+                            <!-- Post detail will be loaded here -->
+                        </article>
+                    </div>
+                </div>
+                <aside class="post-detail-sidebar">
+                    <div class="blog-sidebar-header">
+                        <h3>카테고리</h3>
+                    </div>
+                    <nav class="blog-category-nav">
+                        <ul class="blog-category-list" id="postDetailCategoryList">
+                            <!-- Categories will be loaded here -->
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="section">
+            <div class="container">
+                <h2 class="section-title">Gallery</h2>
+                <div class="gallery-content">
+                    <p>갤러리 섹션입니다. 프로젝트 스크린샷이나 이미지를 추가할 수 있습니다.</p>
+                    <div class="gallery-grid">
+                        <div class="gallery-item">
+                            <div class="gallery-placeholder">이미지 1</div>
+                        </div>
+                        <div class="gallery-item">
+                            <div class="gallery-placeholder">이미지 2</div>
+                        </div>
+                        <div class="gallery-item">
+                            <div class="gallery-placeholder">이미지 3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 devblog. Made by Choiyuhyeon.</p>
+        </div>
+    </footer>
+
+    <div class="custom-cursor" id="customCursor"></div>
+    <script src="script.js"></script>
+</body>
+</html>
+
