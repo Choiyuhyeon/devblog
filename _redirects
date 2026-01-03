@@ -1,0 +1,11 @@
+# 루트 경로는 index.html로
+/    /index.html   200
+
+# 깔끔한 URL을 위한 리다이렉트 (확장자 없이)
+/home    /home.html   200
+/about    /about.html   200
+/contact    /contact.html   200
+
+# 실제 파일이 존재하지 않을 때만 index.html로 리다이렉트
+/*    /index.html   200
+

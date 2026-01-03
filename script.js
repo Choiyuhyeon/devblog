@@ -505,8 +505,8 @@ function loadCategories() {
                 if (typeof filterByCategory === 'function') {
                     filterByCategory(category);
                 } else {
-                    // 다른 페이지에서 클릭한 경우 index.html로 이동
-                    window.location.href = `index.html#blog`;
+                    // 다른 페이지에서 클릭한 경우 루트로 이동
+                    window.location.href = `/#blog`;
                 }
             });
             li.appendChild(link);
@@ -768,18 +768,33 @@ function initNavigation() {
     // 네비게이션 링크 클릭 이벤트
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            
             // 외부 링크는 기본 동작 유지
-            if (link.getAttribute('href').startsWith('http') || 
-                link.getAttribute('href').includes('.html')) {
+            if (href.startsWith('http')) {
                 return;
             }
             
-            e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
-            navigateToSection(targetId);
+            // 해시 링크 (#blog, #gallery)는 현재 페이지에서 처리
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                // 루트 페이지인 경우에만 navigateToSection 사용
+                if (window.location.pathname === '/' || 
+                    window.location.pathname.endsWith('/') ||
+                    window.location.pathname === '/index.html') {
+                    navigateToSection(targetId);
+                    window.location.hash = href;
+                } else {
+                    // 다른 페이지에서는 루트로 이동
+                    window.location.href = `/${href}`;
+                }
+                navMenu.classList.remove('active');
+                return;
+            }
             
-            // 모바일 메뉴 닫기
-            navMenu.classList.remove('active');
+            // .html 파일 링크는 기본 동작 유지 (페이지 이동)
+            // Netlify에서 정상 작동하도록 그대로 둠
         });
     });
 
@@ -857,8 +872,9 @@ function navigateToSection(sectionId) {
 function loadRecentArticles() {
     if (!recentArticlesGrid) return;
     
-    // home.html인지 확인 (home.html은 최근 5개만 표시, 다른 곳은 최근 3개만)
-    const isHomePage = window.location.pathname.includes('home.html') || 
+    // home 페이지인지 확인 (home은 최근 5개만 표시, 다른 곳은 최근 3개만)
+    const isHomePage = window.location.pathname.includes('/home') ||
+                       window.location.pathname === '/home.html' || 
                       (window.location.pathname === '/' && !window.location.hash);
     const postsToShow = isHomePage ? blogPosts.slice(0, 5) : blogPosts.slice(0, 3);
     
@@ -1152,13 +1168,13 @@ function initTypingAnimation() {
     });
 }
 
-// home.html에서 타이핑 애니메이션 초기화
+// home 페이지에서 타이핑 애니메이션 초기화
 function checkAndInitTyping() {
-    // 경로 체크: home.html 또는 루트 경로
-    const isHomePage = window.location.pathname.includes('home.html') || 
-                       window.location.pathname === '/' || 
-                       window.location.pathname.endsWith('/') ||
-                       (window.location.pathname === '/index.html' && !window.location.hash);
+    // 경로 체크: /home 또는 루트 경로
+    const isHomePage = window.location.pathname.includes('/home') || 
+                       window.location.pathname === '/home.html' ||
+                       (window.location.pathname === '/' && !window.location.hash) || 
+                       (window.location.pathname.endsWith('/') && !window.location.hash);
     
     if (isHomePage) {
         // 여러 방법으로 시도
