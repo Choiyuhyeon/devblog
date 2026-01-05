@@ -17,10 +17,10 @@
     --transition: all 0.3s ease;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
 
 body {
-    font-family: 'Quicksand', sans-serif;
+    font-family: "Noto Sans", sans-serif;
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--bg-color);
@@ -669,32 +669,36 @@ body:has(.home-hero) .main-content {
 }
 
 .post-detail .post-content code {
-    background-color: #1a1a1a;
-    color: #e5e5e5;
+    background-color: #fff9c4;
+    color: #333;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Noto Sans", sans-serif;
     font-size: 0.9em;
+    font-weight: 500;
 }
 
 .post-detail .post-content pre {
-    background-color: #1a1a1a;
-    color: #e5e5e5;
+    background-color: #f8f9fa;
+    color: #2c3e50;
     padding: 1.5rem;
     border-radius: 8px;
     overflow-x: auto;
     margin: 1.5rem 0;
     position: relative;
-    border: 1px solid #333;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .post-detail .post-content pre code {
     background: none;
     padding: 0;
-    color: #e5e5e5;
+    color: #2c3e50;
     font-size: 0.9rem;
     line-height: 1.6;
     display: block;
+    font-weight: 400;
+    font-family: "Noto Sans", sans-serif;
 }
 
 /* 코드 블록 언어 라벨 */
@@ -704,7 +708,7 @@ body:has(.home-hero) .main-content {
     top: 0.5rem;
     right: 1rem;
     font-size: 0.75rem;
-    color: #888;
+    color: #9ca3af;
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -717,20 +721,20 @@ body:has(.home-hero) .main-content {
 
 /* 코드 하이라이팅 색상 */
 .post-detail .post-content pre code .code-keyword {
-    color: #c792ea;
+    color: #7c3aed;
     font-weight: 600;
 }
 
 .post-detail .post-content pre code .code-string {
-    color: #c3e88d;
+    color: #059669;
 }
 
 .post-detail .post-content pre code .code-number {
-    color: #f78c6c;
+    color: #dc2626;
 }
 
 .post-detail .post-content pre code .code-comment {
-    color: #546e7a;
+    color: #6b7280;
     font-style: italic;
 }
 

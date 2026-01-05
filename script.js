@@ -463,6 +463,9 @@ function markdownToHtml(markdown) {
     });
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     
+    // 이미지 (링크보다 먼저 처리해야 함)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;">');
+    
     // 링크
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
     
