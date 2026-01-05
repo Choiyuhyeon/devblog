@@ -17,9 +17,9 @@ Flexbox는 1차원 레이아웃(행 또는 열)에 적합합니다.
 
 ```css
 .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 ```
 
@@ -29,9 +29,9 @@ Grid는 2차원 레이아웃(행과 열)에 적합합니다.
 
 ```css
 .container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
 }
 ```
 
@@ -41,4 +41,3 @@ Grid는 2차원 레이아웃(행과 열)에 적합합니다.
 - **Grid**: 전체 페이지 레이아웃, 카드 그리드
 
 두 기술을 함께 사용하면 더욱 강력한 레이아웃을 만들 수 있습니다!
-
