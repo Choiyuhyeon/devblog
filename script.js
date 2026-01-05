@@ -445,23 +445,81 @@ function parseReadmeToPosts(text) {
 function markdownToHtml(markdown) {
     let html = markdown;
     
-    // 헤더 변환
-    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-    
-    // 강조
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // 코드 블록 (언어 감지 포함)
+    // 코드 블록을 먼저 보호 (다른 변환 전에 처리)
+    const codeBlocks = [];
+    let codeBlockIndex = 0;
     html = html.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
         const language = lang ? lang.trim() : '';
         const codeContent = code.trim();
         const highlightedCode = highlightCode(codeContent, language);
-        return `<pre data-lang="${language}"><code class="language-${language}">${highlightedCode}</code></pre>`;
+        const placeholder = `__CODE_BLOCK_${codeBlockIndex}__`;
+        codeBlocks[codeBlockIndex] = `<pre data-lang="${language}"><code class="language-${language}">${highlightedCode}</code></pre>`;
+        codeBlockIndex++;
+        return placeholder;
     });
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // 인라인 코드 보호
+    const inlineCodes = [];
+    let inlineCodeIndex = 0;
+    html = html.replace(/`([^`]+)`/g, (match, code) => {
+        const placeholder = `__INLINE_CODE_${inlineCodeIndex}__`;
+        inlineCodes[inlineCodeIndex] = `<code>${code}</code>`;
+        inlineCodeIndex++;
+        return placeholder;
+    });
+    
+    // 표 파싱을 먼저 처리 (다른 변환 전에)
+    const tables = [];
+    let tableIndex = 0;
+    html = html.replace(/(\|[^\n]+\|\s*\n\|[-\s|:]+\|\s*\n(?:\|[^\n]+\|\s*\n?)+)/g, (match) => {
+        const lines = match.trim().split('\n').filter(line => line.trim() && line.includes('|'));
+        
+        if (lines.length < 2) return match; // 최소 헤더 + 구분선 필요
+        
+        // 첫 번째 줄이 헤더
+        const headerLine = lines[0];
+        const headerCells = headerLine.split('|').map(cell => cell.trim());
+        
+        // 두 번째 줄은 구분선이므로 건너뛰기
+        // 나머지 줄들이 데이터 행
+        const dataLines = lines.slice(2);
+        
+        // 헤더 셀 정리 (첫 번째와 마지막 빈 문자열 제거)
+        const cleanHeaderCells = headerCells.length > 2 && !headerCells[0] && !headerCells[headerCells.length - 1] 
+            ? headerCells.slice(1, -1) 
+            : headerCells.filter(cell => cell !== '');
+        
+        let headerHtml = '';
+        if (cleanHeaderCells.length > 0) {
+            headerHtml = '<thead><tr>' + cleanHeaderCells.map(cell => `<th>${cell || '&nbsp;'}</th>`).join('') + '</tr></thead>';
+        }
+        
+        const rowsHtml = '<tbody>' + dataLines.map(row => {
+            const cells = row.split('|').map(cell => cell.trim());
+            // 첫 번째와 마지막이 빈 문자열이면 제거
+            const cleanCells = cells.length > 2 && !cells[0] && !cells[cells.length - 1]
+                ? cells.slice(1, -1)
+                : cells.filter(cell => cell !== '');
+            return '<tr>' + cleanCells.map(cell => `<td>${cell || '&nbsp;'}</td>`).join('') + '</tr>';
+        }).join('') + '</tbody>';
+        
+        const placeholder = `__TABLE_${tableIndex}__`;
+        tables[tableIndex] = `<table>${headerHtml}${rowsHtml}</table>`;
+        tableIndex++;
+        return placeholder;
+    });
+    
+    // 헤더 변환 (코드 블록 안이 아닌 경우만)
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    
+    // 수평선 (---)
+    html = html.replace(/^---\s*$/gim, '<hr>');
+    
+    // 강조
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
     // 이미지 (링크보다 먼저 처리해야 함)
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;">');
@@ -469,20 +527,100 @@ function markdownToHtml(markdown) {
     // 링크
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
     
-    // 리스트
-    html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-    html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    // 리스트 처리 개선
+    const lines = html.split('\n');
+    let inList = false;
+    let listType = '';
+    let result = [];
     
-    // 줄바꿈을 <p> 태그로
-    const paragraphs = html.split('\n\n');
-    html = paragraphs.map(p => {
-        p = p.trim();
-        if (p && !p.startsWith('<')) {
-            return '<p>' + p + '</p>';
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const listMatch = line.match(/^([\*\-\+])\s+(.+)$/);
+        
+        if (listMatch) {
+            const marker = listMatch[1];
+            const content = listMatch[2];
+            const currentListType = marker === '*' || marker === '-' || marker === '+' ? 'ul' : 'ol';
+            
+            if (!inList || listType !== currentListType) {
+                if (inList) {
+                    result.push(`</${listType}>`);
+                }
+                result.push(`<${currentListType}>`);
+                inList = true;
+                listType = currentListType;
+            }
+            result.push(`<li>${content}</li>`);
+        } else {
+            if (inList) {
+                result.push(`</${listType}>`);
+                inList = false;
+            }
+            if (line) {
+                result.push(line);
+            }
         }
-        return p;
+    }
+    
+    if (inList) {
+        result.push(`</${listType}>`);
+    }
+    
+    html = result.join('\n');
+    
+    // 표 복원
+    tables.forEach((table, index) => {
+        html = html.replace(`__TABLE_${index}__`, table);
+    });
+    
+    // 인라인 코드 복원
+    inlineCodes.forEach((code, index) => {
+        html = html.replace(`__INLINE_CODE_${index}__`, code);
+    });
+    
+    // 코드 블록 복원
+    codeBlocks.forEach((block, index) => {
+        html = html.replace(`__CODE_BLOCK_${index}__`, block);
+    });
+    
+    // 줄바꿈 처리 개선 - 코드 블록과 테이블은 보호
+    // 먼저 블록 요소들을 보호
+    const blockElements = [];
+    let blockIndex = 0;
+    html = html.replace(/(<(?:pre|table|ul|ol|h[1-6]|hr)[^>]*>[\s\S]*?<\/(?:pre|table|ul|ol|h[1-6]|hr)>)/g, (match) => {
+        const placeholder = `__BLOCK_ELEMENT_${blockIndex}__`;
+        blockElements[blockIndex] = match;
+        blockIndex++;
+        return placeholder;
+    });
+    
+    // 줄바꿈 처리 - 빈 줄을 <br>로 변환하되, 이미 태그가 있는 줄은 제외
+    html = html.split('\n').map(line => {
+        line = line.trim();
+        if (!line) {
+            return '<br>';
+        }
+        // 이미 HTML 태그로 시작하는 줄은 그대로
+        if (line.startsWith('<')) {
+            return line;
+        }
+        // 일반 텍스트는 <p> 태그로 감싸기
+        return `<p>${line}</p>`;
     }).join('\n');
+    
+    // 연속된 <p> 태그를 하나로 합치기
+    html = html.replace(/(<\/p>\s*<br>\s*<p>)+/g, '</p><p>');
+    
+    // <p> 태그 안에 블록 요소가 있으면 제거
+    html = html.replace(/<p>(<[h1-6])/g, '$1');
+    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<ul|<ol|<table|<pre|<hr)/g, '$1');
+    html = html.replace(/(<\/ul>|<\/ol>|<\/table>|<\/pre>|<\/hr>)<\/p>/g, '$1');
+    
+    // 블록 요소 복원
+    blockElements.forEach((block, index) => {
+        html = html.replace(`__BLOCK_ELEMENT_${index}__`, block);
+    });
     
     return html;
 }
